@@ -11,5 +11,9 @@ interface FeedbackDao {
     suspend fun insert(feedback: FeedbackEntity): Long
 
     @Query("SELECT * FROM feedbacks WHERE attemptId = :attemptId")
-    suspend fun getFeedbackByAttemptId(attemptId: Long): FeedbackEntity?
+    suspend fun getFeedbackByAttemptId(attemptId: Long): List<FeedbackEntity>
+
+    // FOR STATS
+    @Query("SELECT * FROM feedbacks f JOIN attempts a ON a.id = f.attemptId JOIN games g ON a.gameId = g.id WHERE g.makerId = :playerId AND (computerCorrectColor != correctColor OR computerCorrectPosition != correctPosition)")
+    suspend fun getFalseFeedbacksForPlayerId(playerId: Long): List<FeedbackEntity>
 }

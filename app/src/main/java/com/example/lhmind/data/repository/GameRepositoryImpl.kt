@@ -66,17 +66,8 @@ class GameRepositoryImpl(
     }
 
     override suspend fun saveFeedback(feedback: Feedback): Feedback {
-        //val feedbackEntityExisting = feedbackDao.getFeedbackByAttemptId(feedback.attemptId)
         val feedbackEntity = feedbackMapper.mapDomainToEntity(feedback)
-
-        /*val feedbackId = if (feedbackEntityExisting != null) {
-            feedbackDao.update(feedbackEntity.copy(id = feedbackEntityExisting.id))
-            feedbackEntityExisting.id
-        } else {
-            feedbackDao.insert(feedbackEntity)
-        }*/
         val feedbackId = feedbackDao.insert(feedbackEntity)
-
         return feedbackMapper.mapEntityToDomain(feedbackEntity.copy(id = feedbackId))
     }
 }
