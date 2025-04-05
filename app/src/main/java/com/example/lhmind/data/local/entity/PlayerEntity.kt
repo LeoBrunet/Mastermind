@@ -8,6 +8,6 @@ import java.time.LocalDateTime
 data class PlayerEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
-    val username: String,
+    val name: String,
     val registrationDate: LocalDateTime
 )

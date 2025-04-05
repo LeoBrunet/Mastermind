@@ -1,10 +1,6 @@
 package com.example.lhmind.data.local.dao
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Transaction
-import androidx.room.Update
+import androidx.room.*
 import com.example.lhmind.data.local.entity.GameEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -22,16 +18,12 @@ interface GameDao {
         AND status != 'COMPLETED'
         ORDER BY startTime DESC
     """)
-    fun getActiveGamesForPlayer(playerId: Long): Flow<List<GameEntity>>
+    fun getActiveGamesForPlayer(playerId: Long): List<GameEntity>
 
     @Update
     suspend fun update(game: GameEntity)
 
-    @Query("""
-        UPDATE games 
-        SET remainingAttempts = remainingAttempts - 1 
-        WHERE id = :gameId
-    """)
+    @Query("UPDATE games SET remainingAttempts = remainingAttempts - 1 WHERE id = :gameId")
     suspend fun decrementRemainingAttempts(gameId: Long)
 
     /*@Transaction
@@ -44,5 +36,5 @@ interface GameDao {
         FROM games g
         WHERE g.id = :gameId
     """)
-    suspend fun getGameWithStats(gameId: Long): GameWithStats*/
+    suspend fun getGameWithStats(gameId: String): GameWithStats*/
 }

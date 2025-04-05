@@ -10,4 +10,5 @@ interface GameRepository {
     suspend fun getGame(gameId: Long): Game
     suspend fun makeAttempt(gameId: Long, pegs: List<Peg>): Attempt
     suspend fun saveFeedback(feedback: Feedback): Feedback
+    suspend fun getActiveGamesForPlayer(playerId: Long): List<Game>
 }

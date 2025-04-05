@@ -15,15 +15,17 @@ import com.example.lhmind.domain.model.GameStatus
 import com.example.lhmind.domain.model.Peg
 import com.example.lhmind.domain.repository.GameRepository
 import java.time.LocalDateTime
+import javax.inject.Inject
 
-class GameRepositoryImpl(
+class GameRepositoryImpl @Inject constructor(
     private val gameDao: GameDao,
-    private val gameMapper: GameMapper,
     private val attemptDao: AttemptDao,
-    private val attemptMapper: AttemptMapper,
     private val feedbackDao: FeedbackDao,
+    private val gameMapper: GameMapper,
+    private val attemptMapper: AttemptMapper,
     private val feedbackMapper: FeedbackMapper
 ) : GameRepository {
+
     override suspend fun createGame(makerId: Long, breakerId: Long): Game {
         val gameEntity = GameEntity(
             makerId = makerId,
@@ -32,7 +34,6 @@ class GameRepositoryImpl(
             endTime = null,
             isWon = false,
             remainingAttempts = 12,
-            status = GameStatus.WAITING_FOR_ATTEMPT,
             secretCombination = emptyList()
         )
 
@@ -62,6 +63,8 @@ class GameRepositoryImpl(
         gameDao.getGameById(gameId)?.copy(status = GameStatus.WAITING_FOR_FEEDBACK)
             ?.let { gameDao.update(it) }
 
+        println("Attempt ID: $attemptId for Game ID: $gameId with status: ${gameDao.getGameById(gameId)?.status}")
+
         return attemptMapper.mapEntityToDomain(attemptEntity.copy(id = attemptId))
     }
 
@@ -69,5 +72,9 @@ class GameRepositoryImpl(
         val feedbackEntity = feedbackMapper.mapDomainToEntity(feedback)
         val feedbackId = feedbackDao.insert(feedbackEntity)
         return feedbackMapper.mapEntityToDomain(feedbackEntity.copy(id = feedbackId))
+    }
+
+    override suspend fun getActiveGamesForPlayer(playerId: Long): List<Game> {
+        return gameDao.getActiveGamesForPlayer(playerId).map { gameMapper.mapEntityToDomain(it) }
     }
 }

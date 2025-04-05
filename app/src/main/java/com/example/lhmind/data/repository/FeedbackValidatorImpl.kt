@@ -1,20 +1,20 @@
 package com.example.lhmind.data.repository
 
-import com.example.lhmind.data.local.dao.AttemptDao
-import com.example.lhmind.data.local.dao.GameDao
-import com.example.lhmind.data.mapper.GameMapper
 import com.example.lhmind.domain.model.Feedback
 import com.example.lhmind.domain.model.GameStatus
 import com.example.lhmind.domain.repository.FeedbackValidator
 import com.example.lhmind.domain.repository.GameRepository
+import com.example.lhmind.data.local.dao.AttemptDao
+import com.example.lhmind.data.local.dao.GameDao
+import com.example.lhmind.data.mapper.GameMapper
+import javax.inject.Inject
 
-class FeedbackValidatorImpl (
+class FeedbackValidatorImpl @Inject constructor(
     private val gameRepository: GameRepository,
     private val attemptDao: AttemptDao,
     private val gameDao: GameDao,
     private val gameMapper: GameMapper
-): FeedbackValidator {
-
+) : FeedbackValidator {
     override suspend fun validateAndSave(feedback: Feedback): Feedback {
         val attempt = attemptDao.getAttemptById(feedback.attemptId)
         var correctColors = 0

@@ -35,7 +35,14 @@ class GameRepositoryImplTest {
         attemptMapper = mock()
         feedbackDao = mock()
         feedbackMapper = mock()
-        repository = GameRepositoryImpl(gameDao, gameMapper, attemptDao, attemptMapper, feedbackDao, feedbackMapper)
+        repository = GameRepositoryImpl(
+            gameDao = gameDao,
+            gameMapper = gameMapper,
+            attemptDao = attemptDao,
+            attemptMapper = attemptMapper,
+            feedbackDao = feedbackDao,
+            feedbackMapper = feedbackMapper
+        )
     }
 
     @Test

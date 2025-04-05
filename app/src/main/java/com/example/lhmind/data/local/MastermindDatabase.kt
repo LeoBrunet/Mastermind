@@ -9,15 +9,18 @@ import com.example.lhmind.data.local.converter.Converters
 import com.example.lhmind.data.local.dao.AttemptDao
 import com.example.lhmind.data.local.dao.FeedbackDao
 import com.example.lhmind.data.local.dao.GameDao
+import com.example.lhmind.data.local.dao.PlayerDao
 import com.example.lhmind.data.local.entity.AttemptEntity
 import com.example.lhmind.data.local.entity.FeedbackEntity
 import com.example.lhmind.data.local.entity.GameEntity
+import com.example.lhmind.data.local.entity.PlayerEntity
 
 @Database(
     entities = [
         GameEntity::class,
         AttemptEntity::class,
-        FeedbackEntity::class
+        FeedbackEntity::class,
+        PlayerEntity::class,
         // Add other entities here
     ],
     version = 1
@@ -27,6 +30,7 @@ abstract class MastermindDatabase : RoomDatabase() {
     abstract fun gameDao(): GameDao
     abstract fun attemptDao(): AttemptDao
     abstract fun feedbackDao(): FeedbackDao
+    abstract fun playerDao(): PlayerDao
     // Add other DAOs here
 
     companion object {
