@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -27,17 +28,31 @@ class HomeViewModel @Inject constructor(
     private val _activeGames = MutableStateFlow<List<Game>>(emptyList())
     val activeGames: StateFlow<List<Game>> = _activeGames.asStateFlow()
 
+    private val _opponentNames = MutableStateFlow<Map<Long, String>>(emptyMap())
+    val opponentNames: StateFlow<Map<Long, String>> = _opponentNames.asStateFlow()
+
     init {
         val playerId: Long? = savedStateHandle["playerId"]
         _playerId.value = playerId
-        viewModelScope.launch(Dispatchers.IO) {
-            fetchActiveGames()
-        }
+        fetchActiveGames()
     }
 
-    private suspend fun fetchActiveGames() {
-        _playerId.value?.let { playerId ->
-            _activeGames.value = gameRepository.getActiveGamesForPlayer(playerId)
+    private fun fetchActiveGames() {
+        viewModelScope.launch(Dispatchers.IO) {
+            _playerId.value?.let { playerId ->
+                _activeGames.value = gameRepository.getActiveGamesForPlayer(playerId)
+                val neededIds = _activeGames.value.map {
+                    if (it.makerId == _playerId.value) it.breakerId else it.makerId
+                }.distinct()
+
+                val namesMap = neededIds.associateWith { id ->
+                    withContext(Dispatchers.IO) {
+                        playerRepository.getPlayerById(id).name
+                    }
+                }
+
+                _opponentNames.value = namesMap
+            }
         }
     }
 }

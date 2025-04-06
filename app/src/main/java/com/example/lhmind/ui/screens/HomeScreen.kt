@@ -12,7 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.example.lhmind.domain.model.toDisplayString
 import com.example.lhmind.ui.viewmodel.HomeViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -22,6 +24,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val activeGames by viewModel.activeGames.collectAsState()
+    val opponentNames by viewModel.opponentNames.collectAsState()
 
     Scaffold(
         topBar = {
@@ -59,27 +62,32 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     items(activeGames) { game ->
+                        val playerIsMaker = game.makerId == playerId
+                        val opponentId = if (playerIsMaker) game.breakerId else game.makerId
+                        val opponentName = opponentNames[opponentId] ?: "Chargement..."
+
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(vertical = 8.dp)
                                 .clickable {
-                                    navController.navigate("game/${game.id}")
+                                    navController.navigate("game/${game.id}/${playerId}")
                                 },
                             onClick = {
-                                navController.navigate("game/${game.id}")
+                                navController.navigate("game/${game.id}/${playerId}")
                             }
                         ) {
                             Column(
                                 modifier = Modifier.padding(16.dp)
                             ) {
+
                                 Text(
-                                    text = "Partie avec TODO",
+                                    text = "${if (playerIsMaker) "[MAKER]" else "[BREAKER]"} Partie avec $opponentName",
                                     style = MaterialTheme.typography.titleMedium
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
-                                    text = "Statut : ${game.status}",
+                                    text = "Statut : ${game.status.toDisplayString(isMaker = playerIsMaker)}",
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                             }

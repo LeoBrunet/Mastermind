@@ -16,6 +16,6 @@ data class GameEntity(
     val endTime: LocalDateTime?,
     val isWon: Boolean,
     val remainingAttempts: Int,
-    val status: GameStatus = GameStatus.WAITING_FOR_ATTEMPT,
+    val status: GameStatus = GameStatus.INVITATION,
     val secretCombination: List<Peg> = emptyList()
 )

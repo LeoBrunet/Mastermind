@@ -4,4 +4,5 @@ import com.example.lhmind.domain.model.Feedback
 
 interface FeedbackValidator {
     suspend fun validateAndSave(feedback: Feedback): Feedback
+    suspend fun validate(feedback: Feedback): Boolean
 }

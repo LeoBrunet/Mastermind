@@ -47,16 +47,20 @@ fun Navigation(navController: NavHostController) {
         ) { backStackEntry ->
             val playerId = backStackEntry.arguments?.getLong("playerId")
             CreateGameScreen(playerId) { gameId ->
-                navController.navigate("game/$gameId")
+                navController.navigate("game/$gameId/$playerId")
             }
         }
 
         composable(
-            route = "game/{gameId}",
-            arguments = listOf(navArgument("gameId") { type = NavType.LongType })
+            route = "game/{gameId}/{playerId}",
+            arguments = listOf(
+                navArgument("gameId") { type = NavType.LongType },
+                navArgument("playerId") { type = NavType.LongType }
+            )
         ) { backStackEntry ->
             val gameId = backStackEntry.arguments?.getLong("gameId")
-            GameScreen(gameId = gameId, navController = navController)
+            val playerId = backStackEntry.arguments?.getLong("playerId")
+            GameScreen(gameId = gameId, playerId = playerId, navController = navController)
         }
     }
 }

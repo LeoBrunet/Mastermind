@@ -1,6 +1,5 @@
 package com.example.lhmind.ui.viewmodel
 
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -29,9 +28,24 @@ class GameViewModel @Inject constructor(
     private val _game = MutableStateFlow<Game?>(null)
     val game: StateFlow<Game?> = _game.asStateFlow()
 
+    private val _attempts = MutableStateFlow<List<Attempt>>(emptyList())
+    val attempts: StateFlow<List<Attempt>> = _attempts.asStateFlow()
+
+    private val _feedbacks = MutableStateFlow<List<Feedback>>(emptyList())
+    val feedbacks: StateFlow<List<Feedback>> = _feedbacks.asStateFlow()
+
+    private val _chatMessages = MutableStateFlow<List<String>>(emptyList())
+    val chatMessages: StateFlow<List<String>> = _chatMessages.asStateFlow()
+
+    private val _chatMessage = MutableStateFlow("")
+    val chatMessage: StateFlow<String> = _chatMessage.asStateFlow()
+
     init {
         val gameId: Long? = savedStateHandle["gameId"]
-        gameId?.let { fetchGame(it) }
+        gameId?.let {
+            fetchGame(it)
+            fetchAttempts(it)
+        }
     }
 
     private fun fetchGame(gameId: Long) {
@@ -43,73 +57,39 @@ class GameViewModel @Inject constructor(
             }
         }
     }
-    
-    private val _attempts = MutableStateFlow<List<Attempt>>(emptyList())
-    val attempts: StateFlow<List<Attempt>> = _attempts.asStateFlow()
-    
-    private val _feedbacks = MutableStateFlow<List<Feedback>>(emptyList())
-    val feedbacks: StateFlow<List<Feedback>> = _feedbacks.asStateFlow()
-    
-    private val _currentRow = MutableStateFlow(0)
-    val currentRow: StateFlow<Int> = _currentRow.asStateFlow()
-    
-    private val _selectedPegs = MutableStateFlow<List<Peg>>(emptyList())
-    val selectedPegs: StateFlow<List<Peg>> = _selectedPegs.asStateFlow()
-    
-    private val _chatMessages = MutableStateFlow<List<String>>(emptyList())
-    val chatMessages: StateFlow<List<String>> = _chatMessages.asStateFlow()
 
-    private val _chatMessage = MutableStateFlow("")
-    val chatMessage: StateFlow<String> = _chatMessage.asStateFlow()
-
-    // Méthodes pour le GameBoard
-    fun getPegColor(row: Int, col: Int): PegColor {
-        return attempts.value.getOrNull(row)?.pegs?.getOrNull(col)?.color ?: PegColor.NONE
-    }
-    
-    fun getCorrectPositions(row: Int): Int {
-        return feedbacks.value[row].correctColor
-    }
-    
-    fun getCorrectColors(row: Int): Int {
-        return feedbacks.value[row].correctPosition
-    }
-    
-    fun selectNewPeg(color: PegColor) {
-        if (_selectedPegs.value.size < 4) {
-            _selectedPegs.value += Peg(position = _selectedPegs.value.size + 1, color)
+    fun fetchAttempts(gameId: Long) {
+        viewModelScope.launch {
+            _attempts.value = try { gameUseCase.getAttempts(gameId) } catch (e: Exception) {
+                emptyList()
+            }
         }
     }
 
-    fun removeSelectedPeg(position: Int) {
-        _selectedPegs.value = _selectedPegs.value.filter { it.position != position }
-    }
-
-    fun submitAttempt() {
+    fun submitAttempt(selectedPegs: List<Peg>) {
         val game = _game.value
-        val selected = _selectedPegs.value
 
         println("submitAttempt called with game status: ${game?.status}")
         if (game == null || game.status != GameStatus.WAITING_FOR_ATTEMPT) return
-        if (selected.size != 4) return
+        if (selectedPegs.size != 4) return
 
         viewModelScope.launch {
-            val attempt = gameUseCase.makeAttempt(game.id, selected)
-
-            _attempts.value += attempt
-            _currentRow.value++
-            _selectedPegs.value = emptyList()
+            _attempts.value += gameUseCase.makeAttempt(game.id, selectedPegs)
             fetchGame(game.id)
         }
     }
 
-
-    private fun calculateFeedback(attempt: List<Color>): Pair<Int, Int> {
-        // TODO: Implémenter la logique réelle de validation
-        // Pour l'instant, simulation aléatoire
-        val correctPositions = attempt.take(2).count() // Exemple simplifié
-        val correctColors = attempt.takeLast(2).count() // Exemple simplifié
-        return correctPositions to correctColors
+    fun createSecretCombination(pegs: List<Peg>) {
+        viewModelScope.launch {
+            val game = _game.value ?: return@launch
+            
+            val updatedGame = game.copy(
+                status = GameStatus.WAITING_FOR_ATTEMPT,
+                secretCombination = pegs
+            )
+            gameUseCase.createSecretCombination(game.id, pegs)
+            _game.value = updatedGame
+        }
     }
 
     fun updateChatMessage(message: String) {
@@ -118,8 +98,25 @@ class GameViewModel @Inject constructor(
 
     fun sendChatMessage() {
         if (_chatMessage.value.isNotBlank()) {
-            _chatMessages.value = _chatMessages.value + _chatMessage.value
+            _chatMessages.value += _chatMessage.value
             _chatMessage.value = ""
+        }
+    }
+
+    suspend fun validateFeedback(feedback: Feedback): Boolean {
+        println("validateFeedback called with feedback: $feedback")
+        println("validateFeedback returns: ${gameUseCase.validateFeedback(feedback)}")
+        return gameUseCase.validateFeedback(feedback)
+    }
+
+    fun submitFeedback(feedback: Feedback) {
+        val game = _game.value
+
+        println("submitFeedback called with game status: ${game?.status}")
+        if (game == null || (game.status != GameStatus.WAITING_FOR_FEEDBACK && game.status != GameStatus.WRONG_FEEDBACK)) return
+        viewModelScope.launch {
+            _feedbacks.value += gameUseCase.provideFeedback(feedback)
+            fetchGame(game.id)
         }
     }
 }

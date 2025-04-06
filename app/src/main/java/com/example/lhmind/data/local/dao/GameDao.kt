@@ -2,6 +2,7 @@ package com.example.lhmind.data.local.dao
 
 import androidx.room.*
 import com.example.lhmind.data.local.entity.GameEntity
+import com.example.lhmind.domain.model.Peg
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -25,6 +26,9 @@ interface GameDao {
 
     @Query("UPDATE games SET remainingAttempts = remainingAttempts - 1 WHERE id = :gameId")
     suspend fun decrementRemainingAttempts(gameId: Long)
+
+    @Query("UPDATE games SET secretCombination = :pegs WHERE id = :gameId")
+    suspend fun createSecretCombination(gameId: Long, pegs: List<Peg>)
 
     /*@Transaction
     @Query("""

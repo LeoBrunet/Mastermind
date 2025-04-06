@@ -22,7 +22,6 @@ fun PegSelector(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        // Afficher les couleurs sélectionnées
         Row(
             modifier = Modifier.weight(1f),
             horizontalArrangement = Arrangement.SpaceEvenly
@@ -47,7 +46,6 @@ fun PegSelector(
                 }
             }
 
-            // Placeholder pour les cases vides
             repeat(4 - selectedPegs.size) {
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceVariant,
@@ -61,10 +59,8 @@ fun PegSelector(
             }
         }
 
-        // Séparateur
         Spacer(modifier = Modifier.width(16.dp))
 
-        // Palette de couleurs disponibles
         Row(
             modifier = Modifier.weight(1f),
             horizontalArrangement = Arrangement.SpaceEvenly

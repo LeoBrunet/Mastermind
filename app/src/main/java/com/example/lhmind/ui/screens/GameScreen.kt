@@ -12,17 +12,19 @@ import com.example.lhmind.ui.components.GameBoard
 import com.example.lhmind.ui.components.PegSelector
 import com.example.lhmind.ui.viewmodel.GameViewModel
 import androidx.navigation.NavHostController
+import com.example.lhmind.domain.model.toDisplayString
+import com.example.lhmind.ui.components.AttemptMaker
+import com.example.lhmind.ui.components.CodeMaker
+import com.example.lhmind.ui.components.FeedbackMaker
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GameScreen(
     gameId: Long?,
+    playerId: Long?,
     viewModel: GameViewModel = hiltViewModel(),
     navController: NavHostController
 ) {
-    val attempts by viewModel.attempts.collectAsState()
-    val feedbacks by viewModel.feedbacks.collectAsState()
-    val selectedPegs by viewModel.selectedPegs.collectAsState()
     val game by viewModel.game.collectAsState()
 
     Scaffold(
@@ -40,36 +42,70 @@ fun GameScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             when (game?.status) {
+                GameStatus.WAITING_FOR_CODE_CREATION -> {
+                    if (playerId == game?.makerId) {
+                        CodeMaker(viewModel) {
+                            navController.navigate("game/$gameId/$playerId")
+                        }
+                    } else {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "En attente de la création du code par l'adversaire...",
+                                style = MaterialTheme.typography.headlineMedium
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            CircularProgressIndicator()
+                        }
+                    }
+                }
                 GameStatus.WAITING_FOR_ATTEMPT -> {
-                    GameBoard(
-                        attempts = attempts,
-                        feedbacks = feedbacks,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f)
-                    )
+                    if (playerId == game?.breakerId) {
+                        AttemptMaker(viewModel)
+                    } else {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            game?.status?.toDisplayString(true)?.let {
+                                Text(
+                                    text = it,
+                                    style = MaterialTheme.typography.headlineMedium
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                            CircularProgressIndicator()
+                        }
+                    }
+                }
 
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    PegSelector(
-                        selectedPegs = selectedPegs,
-                        onColorSelected = { viewModel.selectNewPeg(it) },
-                        onColorRemoved = { viewModel.removeSelectedPeg(it) }
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Button(
-                        onClick = {
-                            viewModel.submitAttempt()
-                        },
-                        enabled = selectedPegs.size == 4
-                    ) {
-                        Text("Valider l'essai")
+                GameStatus.WAITING_FOR_FEEDBACK, GameStatus.WRONG_FEEDBACK -> {
+                    if (playerId == game?.makerId) {
+                        FeedbackMaker(viewModel)
+                    } else {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            game?.status?.toDisplayString(false)?.let {
+                                Text(
+                                    text = it,
+                                    style = MaterialTheme.typography.headlineMedium
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                            CircularProgressIndicator()
+                        }
                     }
                 }
 
                 GameStatus.INVITATION -> {
+                    // TODO BE ABLE TO REPLY TO INVITATION
                     Column(
                         modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -84,7 +120,7 @@ fun GameScreen(
                     }
                 }
 
-                GameStatus.WAITING_FOR_FEEDBACK, GameStatus.WRONG_FEEDBACK -> {
+                /*GameStatus.WAITING_FOR_FEEDBACK, GameStatus.WRONG_FEEDBACK -> {
                     Column(
                         modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -97,7 +133,7 @@ fun GameScreen(
                         Spacer(modifier = Modifier.height(16.dp))
                         CircularProgressIndicator()
                     }
-                }
+                }*/
 
                 GameStatus.COMPLETED -> {
                     Column(

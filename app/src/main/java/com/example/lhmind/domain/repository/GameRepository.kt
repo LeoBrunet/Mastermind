@@ -11,4 +11,6 @@ interface GameRepository {
     suspend fun makeAttempt(gameId: Long, pegs: List<Peg>): Attempt
     suspend fun saveFeedback(feedback: Feedback): Feedback
     suspend fun getActiveGamesForPlayer(playerId: Long): List<Game>
+    suspend fun createSecretCombination(gameId: Long, pegs: List<Peg>)
+    suspend fun getAttempts(gameId: Long): List<Attempt>
 }

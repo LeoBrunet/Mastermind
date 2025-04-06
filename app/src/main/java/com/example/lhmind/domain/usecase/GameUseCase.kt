@@ -24,19 +24,18 @@ class GameUseCase @Inject constructor(
         return gameRepository.makeAttempt(gameId, pegs)
     }
 
-    suspend fun provideFeedback(
-        attemptId: Long,
-        correctPosition: Int,
-        correctColor: Int
-    ): Feedback {
-        val feedback = Feedback(
-            attemptId = attemptId,
-            correctPosition = correctPosition,
-            correctColor = correctColor,
-            feedbackTime = LocalDateTime.now()
-        )
+    suspend fun getAttempts(gameId: Long): List<Attempt> {
+        return gameRepository.getAttempts(gameId)
+    }
 
+    suspend fun provideFeedback(
+        feedback: Feedback
+    ): Feedback {
         return feedbackValidator.validateAndSave(feedback)
+    }
+
+    suspend fun validateFeedback(feedback: Feedback) : Boolean {
+        return feedbackValidator.validate(feedback)
     }
 
     suspend fun getGame(gameId: Long): Game {
@@ -49,5 +48,9 @@ class GameUseCase @Inject constructor(
 
     suspend fun getPlayer(playerName: String) : Player {
         return playerRepository.getPlayer(playerName)
+    }
+
+    suspend fun createSecretCombination(gameId: Long, pegs: List<Peg>) {
+        gameRepository.createSecretCombination(gameId, pegs)
     }
 }

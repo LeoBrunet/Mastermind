@@ -15,4 +15,7 @@ interface AttemptDao {
 
     @Query("SELECT COUNT(*) FROM attempts WHERE gameId == :gameId")
     suspend fun getNumberOfAttemptForGame(gameId: Long): Int
+
+    @Query("SELECT * FROM attempts WHERE gameId == :gameId")
+    suspend fun getAttemptsForGame(gameId: Long): List<AttemptEntity>
 }
