@@ -1,9 +1,8 @@
 package com.example.lhmind.domain.model
 
-import androidx.compose.ui.graphics.Color
-
 enum class GameStatus {
-    INVITATION,
+    INVITATION_SENT,
+    INVITATION_CANCELED,
     WAITING_FOR_CODE_CREATION,
     WAITING_FOR_ATTEMPT,
     WAITING_FOR_FEEDBACK,
@@ -14,10 +13,16 @@ enum class GameStatus {
 
 fun GameStatus.toDisplayString(isMaker: Boolean): String =
     when (this) {
-        GameStatus.INVITATION -> if (isMaker) {
+        GameStatus.INVITATION_SENT -> if (isMaker) {
             "En attente de réponse à votre invitation"
         } else {
             "Invitation reçue, à vous de répondre"
+        }
+
+        GameStatus.INVITATION_CANCELED -> if (isMaker) {
+            "Vous avez annulé l'invitation"
+        } else {
+            "Invitation annulée par l'adversaire"
         }
 
         GameStatus.WAITING_FOR_CODE_CREATION -> if (isMaker) {

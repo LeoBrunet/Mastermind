@@ -8,8 +8,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.lhmind.domain.model.GameStatus
-import com.example.lhmind.ui.components.GameBoard
-import com.example.lhmind.ui.components.PegSelector
 import com.example.lhmind.ui.viewmodel.GameViewModel
 import androidx.navigation.NavHostController
 import com.example.lhmind.domain.model.toDisplayString
@@ -104,7 +102,7 @@ fun GameScreen(
                     }
                 }
 
-                GameStatus.INVITATION -> {
+                GameStatus.INVITATION_SENT -> {
                     // TODO BE ABLE TO REPLY TO INVITATION
                     Column(
                         modifier = Modifier.fillMaxSize(),
@@ -167,7 +165,7 @@ fun GameScreen(
                     }
                 }
 
-                GameStatus.ABANDONED -> {
+                GameStatus.ABANDONED, GameStatus.INVITATION_CANCELED -> {
                     Column(
                         modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally,

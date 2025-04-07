@@ -72,6 +72,20 @@ class GameRepositoryImpl @Inject constructor(
         return attemptDao.getAttemptsForGame(gameId).map { attemptMapper.mapEntityToDomain(it) }
     }
 
+    override suspend fun acceptInvitation(gameId: Long) {
+        gameDao.update(
+            gameDao.getGameById(gameId)?.copy(status = GameStatus.WAITING_FOR_CODE_CREATION)
+                ?: throw IllegalArgumentException("Game not found")
+        )
+    }
+
+    override suspend fun rejectInvitation(gameId: Long) {
+        gameDao.update(
+            gameDao.getGameById(gameId)?.copy(status = GameStatus.INVITATION_CANCELED)
+                ?: throw IllegalArgumentException("Game not found")
+        )
+    }
+
     override suspend fun saveFeedback(feedback: Feedback): Feedback {
         val feedbackEntity = feedbackMapper.mapDomainToEntity(feedback)
         val feedbackId = feedbackDao.insert(feedbackEntity)

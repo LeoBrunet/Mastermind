@@ -11,6 +11,7 @@ import com.example.lhmind.domain.model.Peg
 import com.example.lhmind.domain.model.PegColor
 import com.example.lhmind.domain.usecase.GameUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -49,7 +50,7 @@ class GameViewModel @Inject constructor(
     }
 
     private fun fetchGame(gameId: Long) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _game.value = try {
                 gameUseCase.getGame(gameId)
             } catch (e: Exception) {
@@ -59,7 +60,7 @@ class GameViewModel @Inject constructor(
     }
 
     fun fetchAttempts(gameId: Long) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _attempts.value = try { gameUseCase.getAttempts(gameId) } catch (e: Exception) {
                 emptyList()
             }
@@ -73,14 +74,14 @@ class GameViewModel @Inject constructor(
         if (game == null || game.status != GameStatus.WAITING_FOR_ATTEMPT) return
         if (selectedPegs.size != 4) return
 
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _attempts.value += gameUseCase.makeAttempt(game.id, selectedPegs)
             fetchGame(game.id)
         }
     }
 
     fun createSecretCombination(pegs: List<Peg>) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             val game = _game.value ?: return@launch
             
             val updatedGame = game.copy(
@@ -114,7 +115,7 @@ class GameViewModel @Inject constructor(
 
         println("submitFeedback called with game status: ${game?.status}")
         if (game == null || (game.status != GameStatus.WAITING_FOR_FEEDBACK && game.status != GameStatus.WRONG_FEEDBACK)) return
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             _feedbacks.value += gameUseCase.provideFeedback(feedback)
             fetchGame(game.id)
         }
