@@ -78,3 +78,8 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.androidx.navigation.compose)
 }
+
+kapt {
+    correctErrorTypes = true
+    useBuildCache = true
+}
