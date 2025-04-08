@@ -12,9 +12,9 @@ data class GameEntity(
     val id: Long = 0,
     val makerId: Long,
     val breakerId: Long,
+    val creatorIsMaker: Boolean,
     val startTime: LocalDateTime,
     val endTime: LocalDateTime?,
-    val isWon: Boolean,
     val remainingAttempts: Int,
     val status: GameStatus = GameStatus.INVITATION_SENT,
     val secretCombination: List<Peg> = emptyList()

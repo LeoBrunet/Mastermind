@@ -37,7 +37,7 @@ class HomeViewModel @Inject constructor(
         fetchActiveGames()
     }
 
-    private fun fetchActiveGames() {
+    fun fetchActiveGames() {
         viewModelScope.launch(Dispatchers.IO) {
             _playerId.value?.let { playerId ->
                 _activeGames.value = gameRepository.getActiveGamesForPlayer(playerId)

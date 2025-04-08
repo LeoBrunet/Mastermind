@@ -69,7 +69,7 @@ fun GameScreen(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
                         ) {
-                            game?.status?.toDisplayString(true)?.let {
+                            game?.status?.toDisplayString(true, isSender = true)?.let {
                                 Text(
                                     text = it,
                                     style = MaterialTheme.typography.headlineMedium
@@ -90,7 +90,7 @@ fun GameScreen(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center
                         ) {
-                            game?.status?.toDisplayString(false)?.let {
+                            game?.status?.toDisplayString(false, isSender = true)?.let {
                                 Text(
                                     text = it,
                                     style = MaterialTheme.typography.headlineMedium

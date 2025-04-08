@@ -8,7 +8,6 @@ import com.example.lhmind.domain.model.Feedback
 import com.example.lhmind.domain.model.Game
 import com.example.lhmind.domain.model.GameStatus
 import com.example.lhmind.domain.model.Peg
-import com.example.lhmind.domain.model.PegColor
 import com.example.lhmind.domain.usecase.GameUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -23,8 +22,6 @@ class GameViewModel @Inject constructor(
     private val gameUseCase: GameUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-
-    val gameId: Long? = savedStateHandle["gameId"]
 
     private val _game = MutableStateFlow<Game?>(null)
     val game: StateFlow<Game?> = _game.asStateFlow()

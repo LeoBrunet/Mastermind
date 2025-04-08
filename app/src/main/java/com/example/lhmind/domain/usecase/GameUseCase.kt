@@ -8,7 +8,6 @@ import com.example.lhmind.domain.model.Player
 import com.example.lhmind.domain.repository.FeedbackValidator
 import com.example.lhmind.domain.repository.GameRepository
 import com.example.lhmind.domain.repository.PlayerRepository
-import java.time.LocalDateTime
 import javax.inject.Inject
 
 class GameUseCase @Inject constructor(
@@ -16,8 +15,8 @@ class GameUseCase @Inject constructor(
     private val playerRepository: PlayerRepository,
     private val feedbackValidator: FeedbackValidator
 ) {
-    suspend fun createGame(makerId: Long, breakerId: Long): Game {
-        return gameRepository.createGame(makerId, breakerId)
+    suspend fun createGame(makerId: Long, breakerId: Long, creatorIsMaker: Boolean): Game {
+        return gameRepository.createGame(makerId, breakerId, creatorIsMaker)
     }
 
     suspend fun makeAttempt(gameId: Long, pegs: List<Peg>): Attempt {

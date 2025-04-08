@@ -11,19 +11,15 @@ enum class GameStatus {
     ABANDONED
 }
 
-fun GameStatus.toDisplayString(isMaker: Boolean): String =
+fun GameStatus.toDisplayString(isMaker: Boolean, isSender: Boolean): String =
     when (this) {
-        GameStatus.INVITATION_SENT -> if (isMaker) {
+        GameStatus.INVITATION_SENT -> if (isSender) {
             "En attente de réponse à votre invitation"
         } else {
             "Invitation reçue, à vous de répondre"
         }
 
-        GameStatus.INVITATION_CANCELED -> if (isMaker) {
-            "Vous avez annulé l'invitation"
-        } else {
-            "Invitation annulée par l'adversaire"
-        }
+        GameStatus.INVITATION_CANCELED -> "La partie a été annulé"
 
         GameStatus.WAITING_FOR_CODE_CREATION -> if (isMaker) {
             "À vous de créer un code"
