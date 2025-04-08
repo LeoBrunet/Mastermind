@@ -12,11 +12,12 @@ import com.example.lhmind.ui.screens.HomeScreen
 import com.example.lhmind.ui.screens.RegisterScreen
 import com.example.lhmind.ui.screens.InvitationsScreen
 
+@Suppress("unused")
 sealed class Screen(val route: String) {
-    object RegisterScreen : Screen("register")
-    object CreateGameScreen : Screen("createGame")
-    object Game : Screen("game")
-    object HomeScreen : Screen("home")
+    data object RegisterScreen : Screen("register")
+    data object CreateGameScreen : Screen("createGame")
+    data object Game : Screen("game")
+    data object HomeScreen : Screen("home")
 }
 
 @Composable
@@ -45,10 +46,8 @@ fun Navigation(navController: NavHostController) {
         composable(
             route = "invitations/{playerId}",
             arguments = listOf(navArgument("playerId") { type = NavType.LongType })
-        ) { backStackEntry ->
-            val playerId = backStackEntry.arguments?.getLong("playerId")
+        ) {
             InvitationsScreen(
-                playerId,
                 navController = navController
             )
         }

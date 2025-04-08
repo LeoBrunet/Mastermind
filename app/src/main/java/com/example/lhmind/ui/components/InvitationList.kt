@@ -1,17 +1,32 @@
 package com.example.lhmind.ui.components
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.lhmind.domain.model.Game
-import com.example.lhmind.domain.model.GameStatus
-import com.example.lhmind.domain.model.toDisplayString
+import com.example.lhmind.domain.model.Invitation
+import com.example.lhmind.ui.common.TimeHelper
+import java.time.LocalDateTime
 
 @Composable
 fun InvitationList(
-    invitations: List<Game>,
+    invitations: List<Invitation>,
     isSent: Boolean,
     onAccept: (Long) -> Unit,
     onReject: (Long) -> Unit,
@@ -33,7 +48,7 @@ fun InvitationList(
             )
         } else {
             Column {
-                invitations.forEach { game ->
+                invitations.forEach { invitation ->
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -47,36 +62,54 @@ fun InvitationList(
                         ) {
                             Column {
                                 Text(
-                                    text = if (isSent) "${game.breakerId} → ${game.makerId}" else "${game.makerId} → ${game.breakerId}",
+                                    text = if (isSent) "À " + invitation.playerNameReceiver else "De " + invitation.playerNameSender,
                                     style = MaterialTheme.typography.titleMedium
                                 )
                                 Text(
-                                    text = game.startTime.toString(),
+                                    text = if ((invitation.senderIsMaker && isSent) || (!invitation.senderIsMaker && !isSent)) {
+                                        "Vous devrez créer un code"
+                                    } else {
+                                        "Vous devrez déchiffrer le code"
+                                    },
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+
+                                Text(
+                                    text = TimeHelper.getRelativeTimeText(invitation.startTime),
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                             }
 
                             if (isSent) {
                                 Button(
-                                    onClick = { onCancel(game.id) },
-                                    modifier = Modifier.width(120.dp)
+                                    onClick = { onCancel(invitation.gameId) },
+                                    modifier = Modifier.width(60.dp)
                                 ) {
-                                    Text("Annuler")
+                                    Icon(
+                                        imageVector = Icons.Default.Close,
+                                        contentDescription = "Annuler"
+                                    )
                                 }
                             } else {
                                 Row {
                                     Button(
-                                        onClick = { onAccept(game.id) },
-                                        modifier = Modifier.width(120.dp)
+                                        onClick = { onAccept(invitation.gameId) },
+                                        modifier = Modifier.width(60.dp)
                                     ) {
-                                        Text("Accepter")
+                                        Icon(
+                                            imageVector = Icons.Default.Check,
+                                            contentDescription = "Accepter"
+                                        )
                                     }
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Button(
-                                        onClick = { onReject(game.id) },
-                                        modifier = Modifier.width(120.dp)
+                                        onClick = { onReject(invitation.gameId) },
+                                        modifier = Modifier.width(60.dp)
                                     ) {
-                                        Text("Refuser")
+                                        Icon(
+                                            imageVector = Icons.Default.Close,
+                                            contentDescription = "Annuler"
+                                        )
                                     }
                                 }
                             }
@@ -85,5 +118,65 @@ fun InvitationList(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewInvitationList() {
+    val sampleReceivedInvitations = listOf(
+        Invitation(
+            gameId = 1L,
+            playerNameSender = "Leo",
+            playerNameReceiver = "Bob",
+            senderIsMaker = true,
+            startTime = LocalDateTime.now()
+        ),
+        Invitation(
+            gameId = 2L,
+            playerNameSender = "Alice",
+            playerNameReceiver = "Bob",
+            senderIsMaker = false,
+            startTime = LocalDateTime.now()
+        )
+    )
+
+    val sampleSentInvitations = listOf(
+        Invitation(
+            gameId = 1L,
+            playerNameSender = "Leo",
+            playerNameReceiver = "Bob",
+            senderIsMaker = true,
+            startTime = LocalDateTime.now().minusDays(1)
+        ),
+        Invitation(
+            gameId = 2L,
+            playerNameSender = "Alice",
+            playerNameReceiver = "Bob",
+            senderIsMaker = false,
+            startTime = LocalDateTime.now()
+        )
+    )
+
+    Column {
+        Text(text = "Received Invitations", style = MaterialTheme.typography.titleLarge)
+        InvitationList(
+            invitations = sampleReceivedInvitations,
+            isSent = false,
+            onAccept = { /* no-op */ },
+            onReject = { /* no-op */ },
+            onCancel = { /* no-op */ }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(text = "Sent Invitations", style = MaterialTheme.typography.titleLarge)
+        InvitationList(
+            invitations = sampleSentInvitations,
+            isSent = true,
+            onAccept = { /* no-op */ },
+            onReject = { /* no-op */ },
+            onCancel = { /* no-op */ }
+        )
     }
 }

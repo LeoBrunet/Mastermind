@@ -1,18 +1,13 @@
 package com.example.lhmind.ui.viewmodel
 
-import android.graphics.text.LineBreaker
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.lhmind.domain.model.Game
 import com.example.lhmind.domain.model.Player
 import com.example.lhmind.domain.usecase.GameUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -21,7 +16,6 @@ class CreateGameViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _player = MutableStateFlow<Player?>(null)
-    val player: StateFlow<Player?> = _player.asStateFlow()
 
     suspend fun createGame(
         playerInvitedName: String,
@@ -41,7 +35,8 @@ class CreateGameViewModel @Inject constructor(
 
         return gameUseCase.createGame(
             makerId = if (creatorIsMaker) creatorPlayer.id else invitedPlayer.id,
-            breakerId = if (creatorIsMaker) invitedPlayer.id else creatorPlayer.id
+            breakerId = if (creatorIsMaker) invitedPlayer.id else creatorPlayer.id,
+            creatorIsMaker = creatorIsMaker
         ).id
     }
 

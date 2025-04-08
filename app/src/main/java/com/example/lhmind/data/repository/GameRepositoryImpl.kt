@@ -26,13 +26,13 @@ class GameRepositoryImpl @Inject constructor(
     private val feedbackMapper: FeedbackMapper
 ) : GameRepository {
 
-    override suspend fun createGame(makerId: Long, breakerId: Long): Game {
+    override suspend fun createGame(makerId: Long, breakerId: Long, creatorIsMaker: Boolean): Game {
         val gameEntity = GameEntity(
             makerId = makerId,
             breakerId = breakerId,
+            creatorIsMaker = creatorIsMaker,
             startTime = LocalDateTime.now(),
             endTime = null,
-            isWon = false,
             remainingAttempts = 12,
             secretCombination = emptyList()
         )
