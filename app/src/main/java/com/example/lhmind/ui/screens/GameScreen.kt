@@ -1,19 +1,34 @@
 package com.example.lhmind.ui.screens
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.lhmind.domain.model.GameStatus
-import com.example.lhmind.ui.viewmodel.GameViewModel
 import androidx.navigation.NavHostController
+import com.example.lhmind.domain.model.GameStatus
 import com.example.lhmind.domain.model.toDisplayString
 import com.example.lhmind.ui.components.AttemptMaker
 import com.example.lhmind.ui.components.CodeMaker
 import com.example.lhmind.ui.components.FeedbackMaker
+import com.example.lhmind.ui.components.ReceivedInvitation
+import com.example.lhmind.ui.components.WaitingScreen
+import com.example.lhmind.ui.viewmodel.GameViewModel
+import com.example.lhmind.ui.viewmodel.InvitationViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -21,6 +36,7 @@ fun GameScreen(
     gameId: Long?,
     playerId: Long?,
     viewModel: GameViewModel = hiltViewModel(),
+    invitationViewModel: InvitationViewModel = hiltViewModel(),
     navController: NavHostController
 ) {
     val game by viewModel.game.collectAsState()
@@ -46,37 +62,26 @@ fun GameScreen(
                             navController.navigate("game/$gameId/$playerId")
                         }
                     } else {
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Text(
-                                text = "En attente de la création du code par l'adversaire...",
-                                style = MaterialTheme.typography.headlineMedium
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            CircularProgressIndicator()
-                        }
+                        WaitingScreen(
+                            message = "En attente de la création du code par l'adversaire...",
+                            destination = "home/$playerId",
+                            destinationText = "Retour au menu",
+                            navController = navController
+                        )
                     }
                 }
+
                 GameStatus.WAITING_FOR_ATTEMPT -> {
                     if (playerId == game?.breakerId) {
                         AttemptMaker(viewModel)
                     } else {
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            game?.status?.toDisplayString(true, isSender = true)?.let {
-                                Text(
-                                    text = it,
-                                    style = MaterialTheme.typography.headlineMedium
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(16.dp))
-                            CircularProgressIndicator()
+                        game?.status?.toDisplayString(true, isSender = true)?.let {
+                            WaitingScreen(
+                                message = it,
+                                destination = "home/$playerId",
+                                destinationText = "Retour au menu",
+                                navController = navController
+                            )
                         }
                     }
                 }
@@ -85,53 +90,35 @@ fun GameScreen(
                     if (playerId == game?.makerId) {
                         FeedbackMaker(viewModel)
                     } else {
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            game?.status?.toDisplayString(false, isSender = true)?.let {
-                                Text(
-                                    text = it,
-                                    style = MaterialTheme.typography.headlineMedium
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(16.dp))
-                            CircularProgressIndicator()
+                        game?.status?.toDisplayString(false, isSender = true)?.let {
+                            WaitingScreen(
+                                message = it,
+                                destination = "home/$playerId",
+                                destinationText = "Retour au menu",
+                                navController = navController
+                            )
                         }
                     }
                 }
 
                 GameStatus.INVITATION_SENT -> {
-                    // TODO BE ABLE TO REPLY TO INVITATION
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            text = "En attente de réponse de l'invitation...",
-                            style = MaterialTheme.typography.headlineMedium
+                    if ((game?.creatorIsMaker == true && game?.makerId == playerId) or (game?.creatorIsMaker == false && game?.breakerId == playerId)) {
+                        WaitingScreen(
+                            message = "En attente de réponse de l'invitation...",
+                            destination = "home/$playerId",
+                            destinationText = "Retour au menu",
+                            navController = navController
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        CircularProgressIndicator()
+                    } else {
+                        ReceivedInvitation(
+                            gameId = gameId,
+                            playerId = playerId,
+                            viewModel = viewModel,
+                            invitationViewModel = invitationViewModel,
+                            navController = navController
+                        )
                     }
                 }
-
-                /*GameStatus.WAITING_FOR_FEEDBACK, GameStatus.WRONG_FEEDBACK -> {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            text = "En attente du retour de l'adversaire...",
-                            style = MaterialTheme.typography.headlineMedium
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        CircularProgressIndicator()
-                    }
-                }*/
 
                 GameStatus.COMPLETED -> {
                     Column(
@@ -155,7 +142,7 @@ fun GameScreen(
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(
                             onClick = {
-                                navController.navigate("home") {
+                                navController.navigate("home/$playerId") {
                                     popUpTo(0)
                                 }
                             }
@@ -178,7 +165,7 @@ fun GameScreen(
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(
                             onClick = {
-                                navController.navigate("home") {
+                                navController.navigate("home/$playerId") {
                                     popUpTo(0)
                                 }
                             }
@@ -201,7 +188,7 @@ fun GameScreen(
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(
                             onClick = {
-                                navController.navigate("home") {
+                                navController.navigate("home/$playerId") {
                                     popUpTo(0)
                                 }
                             }

@@ -12,6 +12,7 @@ import com.example.lhmind.ui.viewmodel.GameViewModel
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
+//
 @Composable
 fun FeedbackMaker(
     viewModel: GameViewModel
@@ -127,7 +128,7 @@ fun FeedbackMaker(
                     }
                 }
             },
-            enabled = correctPosition + correctColor <= 4
+            enabled = correctPosition <= 4 && correctColor <= 4
         ) {
             Text("Valider le feedback")
         }

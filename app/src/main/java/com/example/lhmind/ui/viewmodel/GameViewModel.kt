@@ -8,6 +8,7 @@ import com.example.lhmind.domain.model.Feedback
 import com.example.lhmind.domain.model.Game
 import com.example.lhmind.domain.model.GameStatus
 import com.example.lhmind.domain.model.Peg
+import com.example.lhmind.domain.model.Player
 import com.example.lhmind.domain.usecase.GameUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -38,12 +39,17 @@ class GameViewModel @Inject constructor(
     private val _chatMessage = MutableStateFlow("")
     val chatMessage: StateFlow<String> = _chatMessage.asStateFlow()
 
+    private val _players = MutableStateFlow<List<Player>>(emptyList())
+    val players: StateFlow<List<Player>> = _players.asStateFlow()
+
     init {
         val gameId: Long? = savedStateHandle["gameId"]
         gameId?.let {
             fetchGame(it)
             fetchAttempts(it)
+            fetchPlayers(it)
         }
+
     }
 
     private fun fetchGame(gameId: Long) {
@@ -56,9 +62,20 @@ class GameViewModel @Inject constructor(
         }
     }
 
-    fun fetchAttempts(gameId: Long) {
+    private fun fetchAttempts(gameId: Long) {
         viewModelScope.launch(Dispatchers.IO) {
             _attempts.value = try { gameUseCase.getAttempts(gameId) } catch (e: Exception) {
+                emptyList()
+            }
+        }
+    }
+
+    private fun fetchPlayers(gameId: Long) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val game = gameUseCase.getGame(gameId)
+            _players.value = try {
+                listOf(gameUseCase.getPlayerById(game.makerId), gameUseCase.getPlayerById(game.breakerId))
+            } catch (e: Exception) {
                 emptyList()
             }
         }

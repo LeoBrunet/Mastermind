@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import com.example.lhmind.domain.model.Peg
 import com.example.lhmind.ui.viewmodel.GameViewModel
 
+// TODO SHOW THE FEEDBACKS
 @Composable
 fun AttemptMaker(viewModel: GameViewModel) {
     val attempts by viewModel.attempts.collectAsState()
@@ -34,7 +35,7 @@ fun AttemptMaker(viewModel: GameViewModel) {
         PegSelector(
             selectedPegs = selectedPegs,
             onColorSelected = { selectedPegs += Peg(selectedPegs.size, it) },
-            onColorRemoved = { selectedPegs.drop(it) }
+            onColorRemoved = { selectedPegs = selectedPegs.toMutableList().also { list -> list.removeAt(it) } }
         )
 
         Spacer(modifier = Modifier.height(16.dp))

@@ -58,9 +58,12 @@ fun InvitationsScreen(
             InvitationList(
                 invitations = receivedInvitations,
                 isSent = false,
-                onAccept = { viewModel.acceptInvitation(it) },
+                onAccept = {
+                    viewModel.acceptInvitation(it)
+
+                },
                 onReject = { viewModel.cancelInvitation(it) },
-                onCancel = {viewModel.cancelInvitation(it)},
+                onCancel = { viewModel.cancelInvitation(it) },
                 modifier = Modifier.fillMaxWidth()
             )
 

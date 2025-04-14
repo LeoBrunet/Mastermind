@@ -99,7 +99,7 @@ class GameRepositoryImpl @Inject constructor(
     override suspend fun createSecretCombination(gameId: Long, pegs: List<Peg>) {
         if (pegs.size < 4) { throw IllegalArgumentException("Secret combination must have at least 4 pegs") }
         val game = gameDao.getGameById(gameId) ?: throw IllegalArgumentException("Game not found")
-        if (game.status != GameStatus.WAITING_FOR_ATTEMPT) { throw IllegalArgumentException("Game already have secret combination")}
+        if (game.status != GameStatus.WAITING_FOR_CODE_CREATION) { throw IllegalArgumentException("Game $gameId already have secret combination")}
         gameDao.update(game.copy(status = GameStatus.WAITING_FOR_ATTEMPT))
         return gameDao.createSecretCombination(gameId, pegs)
     }

@@ -68,7 +68,7 @@ fun CodeMaker(
         PegSelector(
             selectedPegs = selectedPegs,
             onColorSelected = { selectedPegs += Peg(selectedPegs.size, it) },
-            onColorRemoved = { selectedPegs.drop(it) }
+            onColorRemoved = { selectedPegs = selectedPegs.toMutableList().also { list -> list.removeAt(it) } }
         )
 
         Spacer(modifier = Modifier.height(16.dp))

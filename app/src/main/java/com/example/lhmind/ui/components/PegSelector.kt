@@ -7,10 +7,12 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.lhmind.domain.model.Peg
 import com.example.lhmind.domain.model.PegColor
 import com.example.lhmind.domain.model.toColor
+import com.example.lhmind.ui.theme.LHMindTheme
 
 @Composable
 fun PegSelector(
@@ -82,5 +84,23 @@ fun PegSelector(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PegSelectorPreview() {
+    LHMindTheme {
+        var message by remember { mutableStateOf("") }
+        var selectedPegs by remember { mutableStateOf(listOf(Peg(0, PegColor.BLACK))) }
+        PegSelector(
+            selectedPegs = selectedPegs,
+            onColorSelected = {selectedPegs = selectedPegs.plus(Peg(selectedPegs.size, it))},
+            onColorRemoved = {
+                selectedPegs = selectedPegs.toMutableList().also { list -> list.removeAt(it) }
+                message = "Color removed $it"
+            }
+        )
+        Text(text = message)
     }
 }
