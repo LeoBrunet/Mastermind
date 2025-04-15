@@ -47,6 +47,7 @@ class GameViewModel @Inject constructor(
         gameId?.let {
             fetchGame(it)
             fetchAttempts(it)
+            fetchFeedbacks(it)
             fetchPlayers(it)
         }
 
@@ -65,6 +66,15 @@ class GameViewModel @Inject constructor(
     private fun fetchAttempts(gameId: Long) {
         viewModelScope.launch(Dispatchers.IO) {
             _attempts.value = try { gameUseCase.getAttempts(gameId) } catch (e: Exception) {
+                emptyList()
+            }
+        }
+    }
+
+    private fun fetchFeedbacks(gameId: Long) {
+        println("fetchFeedbacks called with gameId: $gameId")
+        viewModelScope.launch(Dispatchers.IO) {
+            _feedbacks.value = try { gameUseCase.getFeedbacks(gameId) } catch (e: Exception) {
                 emptyList()
             }
         }
@@ -128,10 +138,11 @@ class GameViewModel @Inject constructor(
         val game = _game.value
 
         println("submitFeedback called with game status: ${game?.status}")
-        if (game == null || (game.status != GameStatus.WAITING_FOR_FEEDBACK && game.status != GameStatus.WRONG_FEEDBACK)) return
-        viewModelScope.launch(Dispatchers.IO) {
-            _feedbacks.value += gameUseCase.provideFeedback(feedback)
-            fetchGame(game.id)
+        if (game != null && (game.status == GameStatus.WAITING_FOR_FEEDBACK || game.status == GameStatus.WRONG_FEEDBACK)) {
+            viewModelScope.launch(Dispatchers.IO) {
+                _feedbacks.value += gameUseCase.provideFeedback(feedback)
+                fetchGame(game.id)
+            }
         }
     }
 }

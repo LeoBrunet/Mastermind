@@ -1,12 +1,12 @@
 package com.example.lhmind.data.repository
 
+import com.example.lhmind.data.local.dao.AttemptDao
+import com.example.lhmind.data.local.dao.GameDao
+import com.example.lhmind.data.mapper.GameMapper
 import com.example.lhmind.domain.model.Feedback
 import com.example.lhmind.domain.model.GameStatus
 import com.example.lhmind.domain.repository.FeedbackValidator
 import com.example.lhmind.domain.repository.GameRepository
-import com.example.lhmind.data.local.dao.AttemptDao
-import com.example.lhmind.data.local.dao.GameDao
-import com.example.lhmind.data.mapper.GameMapper
 import javax.inject.Inject
 
 class FeedbackValidatorImpl @Inject constructor(
@@ -19,7 +19,7 @@ class FeedbackValidatorImpl @Inject constructor(
     override suspend fun validate(feedback: Feedback) : Boolean {
         val finalFeedback = calculateFeedback(feedback)
 
-        return (finalFeedback.correctPosition != feedback.correctPosition) || (finalFeedback.correctColor != feedback.correctColor)
+        return (finalFeedback.correctPosition == feedback.correctPosition) && (finalFeedback.correctColor == feedback.correctColor)
     }
 
     override suspend fun validateAndSave(feedback: Feedback): Feedback {
@@ -42,28 +42,30 @@ class FeedbackValidatorImpl @Inject constructor(
 
     private suspend fun calculateFeedback(feedback: Feedback) : Feedback {
         val attempt = attemptDao.getAttemptById(feedback.attemptId)
-        var correctColors = 0
-        var correctPositions = 0
+        val game = gameDao.getGameById(attempt.gameId)?.let { gameMapper.mapEntityToDomain(it) }
 
-        gameDao.getGameById(attempt.gameId)?.let { gameMapper.mapEntityToDomain(it) }?.let { game ->
-            val pegsToFind = game.secretCombination
-            val pegsAttempt = attempt.pegs
+        val (correctPositions, correctColors) = game?.let {
+            val guess = attempt.pegs
+            val secret = game.secretCombination
 
-            // TODO: CHECK IF THIS IS WORKING
-            println("pegsToFind: $pegsToFind")
+            val colorCounts = secret.groupingBy { it.color }.eachCount().toMutableMap()
+            var correctColors = 0
 
-            pegsAttempt.forEach { pegAttempt ->
-                println("pegAttempt: $pegAttempt")
-                println("correctColor: ${pegsToFind.map { it.color }.contains(pegAttempt.color)}")
-                println("correctPositions: ${pegsToFind.contains(pegAttempt)}")
-                if (pegsToFind.map { it.color }.contains(pegAttempt.color)) {
-                    correctColors += 1
-                }
-                if (pegsToFind.contains(pegAttempt)) {
-                    correctPositions += 1
+            for (peg in guess) {
+                val count = colorCounts[peg.color] ?: 0
+                if (count > 0) {
+                    correctColors++
+                    colorCounts[peg.color] = count - 1
                 }
             }
-        }
+
+            println(secret)
+            println(guess)
+
+            secret.zip(guess).count { (a, b) -> a == b } to correctColors
+        } ?: (0 to 0)
+
+        println("Correct positions: $correctPositions, correct colors: $correctColors")
 
         return feedback.copy(
             computerCorrectPosition = correctPositions,

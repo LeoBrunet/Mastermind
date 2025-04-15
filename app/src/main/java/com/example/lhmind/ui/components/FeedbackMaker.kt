@@ -60,23 +60,30 @@ fun FeedbackMaker(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        attempts.last().let { attempt ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                attempt.pegs.forEach { peg ->
-                    Box(
-                        modifier = Modifier
-                            .size(24.dp)
-                            .background(peg.color.toColor())
-                            .padding(4.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
+        if (attempts.isNotEmpty()) {
+            attempts.last().let { attempt ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    attempt.pegs.forEach { peg ->
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .background(peg.color.toColor())
+                                .padding(4.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
                 }
             }
+        } else {
+            Text(
+                text = "Aucune tentative n'a été faite",
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -121,7 +128,7 @@ fun FeedbackMaker(
                     feedbackTime = LocalDateTime.now()
                 )
                 coroutineScope.launch {
-                    if (!viewModel.validateFeedback(feedback)) {
+                    if (viewModel.validateFeedback(feedback)) {
                         viewModel.submitFeedback(feedback)
                     } else {
                         error = "Mauvais feedback !"

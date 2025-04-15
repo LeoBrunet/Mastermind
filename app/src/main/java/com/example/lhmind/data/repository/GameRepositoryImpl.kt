@@ -72,6 +72,10 @@ class GameRepositoryImpl @Inject constructor(
         return attemptDao.getAttemptsForGame(gameId).map { attemptMapper.mapEntityToDomain(it) }
     }
 
+    override suspend fun getFeedbacks(gameId: Long): List<Feedback> {
+        return feedbackDao.getLastFeedbacksForGame(gameId).map { feedbackMapper.mapEntityToDomain(it) }
+    }
+
     override suspend fun acceptInvitation(gameId: Long) {
         gameDao.update(
             gameDao.getGameById(gameId)?.copy(status = GameStatus.WAITING_FOR_CODE_CREATION)

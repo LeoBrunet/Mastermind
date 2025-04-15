@@ -27,6 +27,10 @@ class GameUseCase @Inject constructor(
         return gameRepository.getAttempts(gameId)
     }
 
+    suspend fun getFeedbacks(gameId: Long): List<Feedback> {
+        return gameRepository.getFeedbacks(gameId)
+    }
+
     suspend fun provideFeedback(
         feedback: Feedback
     ): Feedback {

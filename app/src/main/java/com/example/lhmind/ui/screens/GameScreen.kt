@@ -41,6 +41,7 @@ fun GameScreen(
 ) {
     val game by viewModel.game.collectAsState()
 
+    // TODO DEAL WITH WIN LOOSE
     Scaffold(
         topBar = {
             TopAppBar(

@@ -13,6 +13,7 @@ interface GameRepository {
     suspend fun getActiveGamesForPlayer(playerId: Long): List<Game>
     suspend fun createSecretCombination(gameId: Long, pegs: List<Peg>)
     suspend fun getAttempts(gameId: Long): List<Attempt>
+    suspend fun getFeedbacks(gameId: Long): List<Feedback>
     suspend fun acceptInvitation(gameId: Long)
     suspend fun rejectInvitation(gameId: Long)
 }

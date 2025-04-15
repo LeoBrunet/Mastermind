@@ -1,23 +1,28 @@
 package com.example.lhmind.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.lhmind.domain.model.Attempt
 import com.example.lhmind.domain.model.Feedback
-import com.example.lhmind.domain.model.PegColor
 import com.example.lhmind.domain.model.toColor
-import com.example.lhmind.ui.viewmodel.GameViewModel
 
 @Composable
 fun GameBoard(
@@ -64,21 +69,44 @@ fun GameBoard(
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-                    val feedback = feedbacks.getOrNull(row)
-                    repeat(4) {
-                        Surface(
-                            color = when {
-                                feedback?.correctPosition == 4 && it < feedback.correctPosition -> Color.Black
-                                feedback?.correctColor == 4 && it < feedback.correctColor -> Color.White
-                                else -> MaterialTheme.colorScheme.surfaceVariant
-                            },
-                            shape = CircleShape,
-                            modifier = Modifier
-                                .size(16.dp)
+                    val feedback = feedbacks.getOrNull(row) // récupère le feedback de la ligne
+                    Column {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            // Empty
+                            repeat(4) { index ->
+                                Surface(
+                                    color = when {
+                                        (feedback?.correctPosition ?: 0) > index -> Color.Black // Bonnes positions en noir
+                                        else -> MaterialTheme.colorScheme.surfaceVariant // Par défaut, une couleur neutre
+                                    },
+                                    shape = CircleShape,
+                                    modifier = Modifier.size(16.dp) // Taille des cercles
+                                ) {}
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            repeat(4) { index ->
+                                Surface(
+                                    color = when {
+                                        (feedback?.correctPosition ?: 0) > index -> Color.White // Bonnes couleurs en blanc
+                                        else -> MaterialTheme.colorScheme.surfaceVariant // Par défaut, une couleur neutre
+                                    },
+                                    border = when {
+                                        (feedback?.correctPosition ?: 0) > index -> BorderStroke(1.dp, Color.Black) // Bonnes couleurs en blanc
+                                        else -> BorderStroke(0.dp, Color.Gray) // Par défaut, une couleur neutre
+                                    },
+                                    shape = CircleShape,
+                                    modifier = Modifier.size(16.dp) // Taille des cercles
+                                ) {}
+                            }
                         }
                     }
+
+
                 }
             }
         }
